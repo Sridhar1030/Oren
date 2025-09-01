@@ -41,7 +41,7 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B] p-4">
       <div className="w-full max-w-md">
         {/* Registration Card */}
-        <div className="bg-white/90 shadow-xl rounded-2xl p-8">
+        <div className="bg-white/90 shadow-xl rounded-2xl p-6 sm:p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-[#BBE8E1] rounded-xl flex items-center justify-center mx-auto mb-6">
@@ -55,7 +55,7 @@ const RegisterPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Create account</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create account</h1>
             <p className="text-gray-600">Join Oren today</p>
           </div>
 
@@ -146,7 +146,7 @@ const RegisterPage: React.FC = () => {
                     },
                   })}
                   type={showPassword ? 'text' : 'password'}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:border-[#BBE8E1] text-sm transition-colors"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:border-[#BBE8E1] text-sm transition-colors pr-12"
                   placeholder="Create a password"
                 />
                 <button
@@ -175,7 +175,7 @@ const RegisterPage: React.FC = () => {
                       value === password || 'Passwords do not match',
                   })}
                   type={showConfirmPassword ? 'text' : 'password'}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:border-[#BBE8E1] text-sm transition-colors"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:border-[#BBE8E1] text-sm transition-colors pr-12"
                   placeholder="Confirm your password"
                 />
                 <button
