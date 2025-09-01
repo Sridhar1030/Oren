@@ -10,15 +10,16 @@ import {
   Download,
   ArrowLeft,
   FileText,
-  FileSpreadsheet
+  FileSpreadsheet,
+  AlertCircle
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import Link from 'next/link';
+import { esgAPI, handleApiError } from '@/utils/api';
 
 interface ESGData {
   id: string;
   financialYear: number;
-  companyName: string;
   totalElectricityConsumption: number;
   renewableElectricityConsumption: number;
   totalFuelConsumption: number;
@@ -26,78 +27,151 @@ interface ESGData {
   totalEmployees: number;
   femaleEmployees: number;
   averageTrainingHours: number;
-  communityInvestment: number;
-  independentBoardMembers: number;
-  hasDataPrivacyPolicy: string;
+  communityInvestmentSpend: number;
+  independentBoardMembersPercent: number;
+  hasDataPrivacyPolicy: boolean;
   totalRevenue: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 const SummaryPage: React.FC = () => {
   const [esgData, setEsgData] = useState<ESGData[]>([]);
+  const [selectedYearData, setSelectedYearData] = useState<ESGData | null>(null);
+  const [financialYears, setFinancialYears] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [yearDataLoading, setYearDataLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   useEffect(() => {
-    // TODO: Fetch ESG data from API
-    // For now, show sample data
-    const sampleData: ESGData[] = [
-      {
-        id: '1',
-        financialYear: 2024,
-        companyName: 'Sample Corp',
-        totalElectricityConsumption: 50000,
-        renewableElectricityConsumption: 32500,
-        totalFuelConsumption: 2500,
-        carbonEmissions: 150.5,
-        totalEmployees: 200,
-        femaleEmployees: 96,
-        averageTrainingHours: 24.5,
-        communityInvestment: 500000,
-        independentBoardMembers: 60,
-        hasDataPrivacyPolicy: 'yes',
-        totalRevenue: 25000000,
-        createdAt: '2024-01-15T10:00:00Z'
-      },
-      {
-        id: '2',
-        financialYear: 2023,
-        companyName: 'Sample Corp',
-        totalElectricityConsumption: 48000,
-        renewableElectricityConsumption: 28800,
-        totalFuelConsumption: 2800,
-        carbonEmissions: 165.2,
-        totalEmployees: 180,
-        femaleEmployees: 81,
-        averageTrainingHours: 22.0,
-        communityInvestment: 450000,
-        independentBoardMembers: 55,
-        hasDataPrivacyPolicy: 'yes',
-        totalRevenue: 22000000,
-        createdAt: '2023-01-15T10:00:00Z'
-      }
-    ];
-
-    setTimeout(() => {
-      setEsgData(sampleData);
-      setSelectedYear(2024);
-      setLoading(false);
-    }, 1000);
+    fetchFinancialYears();
   }, []);
 
-  const selectedData = esgData.find(data => data.financialYear === selectedYear);
+  useEffect(() => {
+    if (selectedYear) {
+      console.log('useEffect triggered for selectedYear:', selectedYear);
+      fetchYearData(selectedYear);
+    }
+  }, [selectedYear]);
 
-  // Chart data preparation
-  const yearlyComparisonData = esgData.map(data => ({
-    year: data.financialYear,
-    carbonEmissions: data.carbonEmissions,
-    renewableRatio: data.totalElectricityConsumption > 0 ? 
-      (data.renewableElectricityConsumption / data.totalElectricityConsumption) * 100 : 0,
-    diversityRatio: data.totalEmployees > 0 ? 
-      (data.femaleEmployees / data.totalEmployees) * 100 : 0,
-    communitySpendRatio: data.totalRevenue > 0 ? 
-      (data.communityInvestment / data.totalRevenue) * 100 : 0
-  }));
+  const fetchFinancialYears = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await esgAPI.getFinancialYears();
+      const years = response.data.data;
+      
+      if (years && Array.isArray(years)) {
+        setFinancialYears(years);
+        // Set the most recent year as selected by default
+        if (years.length > 0) {
+          const mostRecentYear = Math.max(...years);
+          setSelectedYear(mostRecentYear);
+        }
+      } else {
+        setFinancialYears([]);
+      }
+    } catch (err) {
+      console.error('Error fetching financial years:', err);
+      setError('Failed to load financial years. Please try again.');
+      handleApiError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchYearData = async (year: number) => {
+    try {
+      setYearDataLoading(true);
+      setError(null);
+      
+      console.log(`Fetching data for year: ${year}`);
+      const response = await esgAPI.getResponseByYear(year);
+      console.log('API Response:', response);
+      
+      const data = response.data.data;
+      console.log('Extracted data:', data);
+      
+      if (data) {
+        setSelectedYearData(data);
+        console.log('Set selected year data:', data);
+      } else {
+        setSelectedYearData(null);
+        console.log('No data found for year:', year);
+      }
+    } catch (err) {
+      console.error(`Error fetching data for year ${year}:`, err);
+      setError(`Failed to load data for FY ${year}. Please try again.`);
+      handleApiError(err);
+    } finally {
+      setYearDataLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      setError(null);
+      
+      // Refresh all data
+      await Promise.all([
+        fetchFinancialYears(),
+        fetchESGData(true)
+      ]);
+      
+      // If we have a selected year, refresh that data too
+      if (selectedYear) {
+        await fetchYearData(selectedYear);
+      }
+    } catch (err) {
+      console.error('Error refreshing data:', err);
+      setError('Failed to refresh data. Please try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const fetchESGData = async (isRefresh = false) => {
+    try {
+      setError(null);
+      
+      const response = await esgAPI.getResponses();
+      const data = response.data.data;
+      
+      if (data && Array.isArray(data)) {
+        setEsgData(data);
+      } else {
+        setEsgData([]);
+      }
+    } catch (err) {
+      console.error('Error fetching ESG data:', err);
+      setError('Failed to load ESG data. Please try again.');
+      handleApiError(err);
+    }
+  };
+
+  // Use selectedYearData for the selected year, fallback to esgData for comparison
+  const selectedData = selectedYearData;
+
+  // Chart data preparation - show data for only the selected year
+  const yearlyComparisonData = selectedYear && selectedData ? [{
+    year: selectedYear,
+    carbonEmissions: selectedData.carbonEmissions,
+    renewableRatio: selectedData.totalElectricityConsumption > 0 ? 
+      (selectedData.renewableElectricityConsumption / selectedData.totalElectricityConsumption) * 100 : 0,
+    diversityRatio: selectedData.totalEmployees > 0 ? 
+      (selectedData.femaleEmployees / selectedData.totalEmployees) * 100 : 0,
+    communitySpendRatio: selectedData.totalRevenue > 0 ? 
+      (selectedData.communityInvestmentSpend / selectedData.totalRevenue) * 100 : 0
+  }] : [];
+
+  // Debug logging
+  console.log('Selected Year:', selectedYear);
+  console.log('Selected Data:', selectedData);
+  console.log('Yearly Comparison Data:', yearlyComparisonData);
 
   const pieData = selectedData ? [
     { name: 'Environmental', value: 35, color: '#10b981' },
@@ -128,6 +202,67 @@ const SummaryPage: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Layout title="ESG Summary - Oren">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B]">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Data</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+                         <button
+               onClick={fetchFinancialYears}
+               className="bg-[#BBE8E1] hover:bg-[#A8D8D1] text-white font-medium py-2 px-4 rounded-lg transition-colors"
+             >
+               Try Again
+             </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (financialYears.length === 0) {
+    return (
+      <Layout title="ESG Summary - Oren">
+        <div className="min-h-screen bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B] py-8">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="mb-8">
+              <Link 
+                href="/questionnaire" 
+                className="inline-flex items-center text-[#BBE8E1] hover:text-[#A8D8D1] mb-4 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Questionnaire
+              </Link>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">ESG Summary Dashboard</h1>
+              <p className="text-gray-600">Comprehensive overview of your sustainability metrics</p>
+            </div>
+            
+            <div className="bg-white/90 shadow-xl rounded-2xl p-12 text-center">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <BarChart3 className="w-12 h-12 text-gray-400" />
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">No ESG Data Available</h2>
+              <p className="text-gray-600 mb-6">
+                You haven't submitted any ESG questionnaires yet. Complete a questionnaire to see your summary dashboard.
+              </p>
+              <Link
+                href="/questionnaire"
+                className="bg-[#BBE8E1] hover:bg-[#A8D8D1] text-white font-medium py-3 px-6 rounded-lg transition-colors inline-flex items-center"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Complete ESG Questionnaire
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout title="ESG Summary - Oren">
       <div className="min-h-screen bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B] py-8">
@@ -148,6 +283,23 @@ const SummaryPage: React.FC = () => {
               </div>
               <div className="flex gap-3">
                 <button
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="bg-[#BBE8E1] hover:bg-[#A8D8D1] text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {refreshing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Refresh Data
+                    </>
+                  )}
+                </button>
+                <button
                   onClick={handleDownloadPDF}
                   className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center"
                 >
@@ -167,27 +319,53 @@ const SummaryPage: React.FC = () => {
 
           {/* Year Selector */}
           <div className="bg-white/90 shadow-xl rounded-2xl p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Financial Year</h2>
-            <div className="flex gap-3">
-              {esgData.map(data => (
-                <button
-                  key={data.financialYear}
-                  onClick={() => setSelectedYear(data.financialYear)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedYear === data.financialYear
-                      ? 'bg-[#BBE8E1] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  FY {data.financialYear}
-                </button>
-              ))}
-            </div>
+                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+               <h2 className="text-xl font-semibold text-gray-900">Select Financial Year</h2>
+               <div className="text-sm text-gray-600">
+                 {financialYears.length} year{financialYears.length !== 1 ? 's' : ''} of data available
+               </div>
+             </div>
+             <div className="flex flex-wrap gap-3">
+               {financialYears
+                 .sort((a, b) => b - a) // Sort by year descending
+                 .map(year => (
+                   <button
+                     key={year}
+                     onClick={() => setSelectedYear(year)}
+                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                       selectedYear === year
+                         ? 'bg-[#BBE8E1] text-white'
+                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                     }`}
+                   >
+                     FY {year}
+                   </button>
+                 ))}
+             </div>
           </div>
 
-          {selectedData && (
-            <>
-              {/* Key Metrics Cards */}
+                     {yearDataLoading && (
+             <div className="bg-white/90 shadow-xl rounded-2xl p-12 text-center mb-8">
+               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#BBE8E1] mx-auto mb-4"></div>
+               <p className="text-gray-600">Loading data for FY {selectedYear}...</p>
+             </div>
+           )}
+
+           {!yearDataLoading && !selectedData && selectedYear && (
+             <div className="bg-white/90 shadow-xl rounded-2xl p-12 text-center mb-8">
+               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                 <AlertCircle className="w-12 h-12 text-gray-400" />
+               </div>
+               <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Data Available for FY {selectedYear}</h2>
+               <p className="text-gray-600 mb-6">
+                 There is no ESG data available for the selected financial year. Please select a different year or complete a questionnaire for this year.
+               </p>
+             </div>
+           )}
+
+           {selectedData && !yearDataLoading && (
+             <>
+               {/* Key Metrics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white/90 shadow-xl rounded-2xl p-6">
                   <div className="flex items-center justify-between">
@@ -243,7 +421,7 @@ const SummaryPage: React.FC = () => {
                       <p className="text-sm text-gray-600 mb-1">Community Spend</p>
                       <p className="text-2xl font-bold text-gray-900">
                         {selectedData.totalRevenue > 0 ? 
-                          ((selectedData.communityInvestment / selectedData.totalRevenue) * 100).toFixed(2) : 'N/A'}%
+                          ((selectedData.communityInvestmentSpend / selectedData.totalRevenue) * 100).toFixed(2) : 'N/A'}%
                       </p>
                       <p className="text-xs text-gray-500">Of total revenue</p>
                     </div>
@@ -256,22 +434,35 @@ const SummaryPage: React.FC = () => {
 
               {/* Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Yearly Comparison */}
-                <div className="bg-white/90 shadow-xl rounded-2xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Yearly ESG Performance Comparison
-                  </h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={yearlyComparisonData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="carbonEmissions" fill="#10b981" name="Carbon Emissions" />
-                      <Bar dataKey="renewableRatio" fill="#3b82f6" name="Renewable Ratio %" />
-                      <Bar dataKey="diversityRatio" fill="#8b5cf6" name="Diversity Ratio %" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                                 {/* Yearly Comparison */}
+                 <div className="bg-white/90 shadow-xl rounded-2xl p-6">
+                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                     ESG Performance for FY {selectedYear}
+                   </h3>
+                                     <ResponsiveContainer width="100%" height={300}>
+                     {yearlyComparisonData.length > 0 && selectedData ? (
+                       <BarChart data={yearlyComparisonData}>
+                         <CartesianGrid strokeDasharray="3 3" />
+                         <XAxis dataKey="year" />
+                         <YAxis />
+                         <Tooltip />
+                         <Bar dataKey="carbonEmissions" fill="#10b981" name="Carbon Emissions" />
+                         <Bar dataKey="renewableRatio" fill="#3b82f6" name="Renewable Ratio %" />
+                         <Bar dataKey="diversityRatio" fill="#8b5cf6" name="Diversity Ratio %" />
+                       </BarChart>
+                     ) : (
+                       <div className="flex items-center justify-center h-full text-gray-500">
+                         <div className="text-center">
+                           <p className="mb-2">No chart data available for the selected year</p>
+                           <p className="text-sm text-gray-400">
+                             Selected Year: {selectedYear} | 
+                             Has Data: {selectedData ? 'Yes' : 'No'} | 
+                             Chart Data Length: {yearlyComparisonData.length}
+                           </p>
+                         </div>
+                       </div>
+                     )}
+                   </ResponsiveContainer>
                 </div>
 
                 {/* ESG Distribution */}
@@ -362,13 +553,13 @@ const SummaryPage: React.FC = () => {
                       <tr className="border-b border-gray-100">
                         <td className="py-3 px-4 text-sm text-gray-600">Governance</td>
                         <td className="py-3 px-4 text-sm text-gray-900">Independent Board Members</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">{selectedData.independentBoardMembers}%</td>
+                        <td className="py-3 px-4 text-sm text-gray-900">{selectedData.independentBoardMembersPercent}%</td>
                         <td className="py-3 px-4 text-sm text-gray-500">%</td>
                       </tr>
                       <tr className="border-b border-gray-100">
                         <td className="py-3 px-4 text-sm text-gray-600">Governance</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">Data Privacy Policy</td>
-                        <td className="py-3 px-4 text-sm text-gray-900 capitalize">{selectedData.hasDataPrivacyPolicy}</td>
+                        <td className="py-4 text-sm text-gray-900">Data Privacy Policy</td>
+                        <td className="py-3 px-4 text-sm text-gray-900 capitalize">{selectedData.hasDataPrivacyPolicy ? 'Yes' : 'No'}</td>
                         <td className="py-3 px-4 text-sm text-gray-500">-</td>
                       </tr>
                       <tr>
