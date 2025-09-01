@@ -29,6 +29,8 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { esgAPI, handleApiError } from "@/utils/api";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface ESGData {
 	id: string;
@@ -213,9 +215,190 @@ const SummaryPage: React.FC = () => {
 		  ]
 		: [];
 
-	const handleDownloadPDF = () => {
-		// TODO: Implement PDF download
-		alert("PDF download functionality will be implemented here");
+	const handleDownloadPDF = async () => {
+		if (!selectedData || !selectedYear) {
+			alert("Please select a financial year with data to download PDF");
+			return;
+		}
+
+		try {
+			// Create a temporary container for PDF generation
+			const pdfContainer = document.createElement('div');
+			pdfContainer.style.position = 'absolute';
+			pdfContainer.style.left = '-9999px';
+			pdfContainer.style.top = '0';
+			pdfContainer.style.width = '800px';
+			pdfContainer.style.backgroundColor = 'white';
+			pdfContainer.style.padding = '20px';
+			pdfContainer.style.fontFamily = 'Arial, sans-serif';
+			document.body.appendChild(pdfContainer);
+
+			// Generate PDF content
+			pdfContainer.innerHTML = `
+				<div style="text-align: center; margin-bottom: 30px;">
+					<h1 style="color: #1f2937; font-size: 28px; margin-bottom: 10px;">ESG Summary Report</h1>
+					<h2 style="color: #6b7280; font-size: 20px; margin-bottom: 5px;">Financial Year ${selectedYear}</h2>
+					<p style="color: #9ca3af; font-size: 14px;">Generated on ${new Date().toLocaleDateString()}</p>
+				</div>
+
+				<div style="margin-bottom: 30px;">
+					<h3 style="color: #1f2937; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Key Performance Metrics</h3>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+						<div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+							<h4 style="color: #10b981; font-size: 16px; margin-bottom: 5px;">Carbon Intensity</h4>
+							<p style="color: #1f2937; font-size: 24px; font-weight: bold; margin: 0;">
+								${selectedData.totalRevenue > 0 ? (selectedData.carbonEmissions / selectedData.totalRevenue).toFixed(2) : 'N/A'}
+							</p>
+							<p style="color: #6b7280; font-size: 12px; margin: 0;">T CO2e / INR</p>
+						</div>
+						<div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+							<h4 style="color: #3b82f6; font-size: 16px; margin-bottom: 5px;">Renewable Energy</h4>
+							<p style="color: #1f2937; font-size: 24px; font-weight: bold; margin: 0;">
+								${selectedData.totalElectricityConsumption > 0 ? ((selectedData.renewableElectricityConsumption / selectedData.totalElectricityConsumption) * 100).toFixed(2) : 'N/A'}%
+							</p>
+							<p style="color: #6b7280; font-size: 12px; margin: 0;">Clean energy ratio</p>
+						</div>
+						<div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+							<h4 style="color: #8b5cf6; font-size: 16px; margin-bottom: 5px;">Diversity Ratio</h4>
+							<p style="color: #1f2937; font-size: 24px; font-weight: bold; margin: 0;">
+								${selectedData.totalEmployees > 0 ? ((selectedData.femaleEmployees / selectedData.totalEmployees) * 100).toFixed(2) : 'N/A'}%
+							</p>
+							<p style="color: #6b7280; font-size: 12px; margin: 0;">Gender diversity</p>
+						</div>
+						<div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #f97316;">
+							<h4 style="color: #f97316; font-size: 16px; margin-bottom: 5px;">Community Spend</h4>
+							<p style="color: #1f2937; font-size: 24px; font-weight: bold; margin: 0;">
+								${selectedData.totalRevenue > 0 ? ((selectedData.communityInvestmentSpend / selectedData.totalRevenue) * 100).toFixed(2) : 'N/A'}%
+							</p>
+							<p style="color: #6b7280; font-size: 12px; margin: 0;">Of total revenue</p>
+						</div>
+					</div>
+				</div>
+
+				<div style="margin-bottom: 30px;">
+					<h3 style="color: #1f2937; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Detailed Metrics</h3>
+					<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+						<thead>
+							<tr style="background: #f3f4f6;">
+								<th style="border: 1px solid #d1d5db; padding: 12px; text-align: left; font-weight: bold; color: #1f2937;">Category</th>
+								<th style="border: 1px solid #d1d5db; padding: 12px; text-align: left; font-weight: bold; color: #1f2937;">Metric</th>
+								<th style="border: 1px solid #d1d5db; padding: 12px; text-align: left; font-weight: bold; color: #1f2937;">Value</th>
+								<th style="border: 1px solid #d1d5db; padding: 12px; text-align: left; font-weight: bold; color: #1f2937;">Unit</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Environmental</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Total Electricity Consumption</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.totalElectricityConsumption.toLocaleString()}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">kWh</td>
+							</tr>
+							<tr style="background: #f9fafb;">
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Environmental</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Renewable Electricity</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.renewableElectricityConsumption.toLocaleString()}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">kWh</td>
+							</tr>
+							<tr>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Environmental</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Carbon Emissions</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.carbonEmissions.toFixed(2)}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">T CO2e</td>
+							</tr>
+							<tr style="background: #f9fafb;">
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Social</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Total Employees</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.totalEmployees.toLocaleString()}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">-</td>
+							</tr>
+							<tr>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Social</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Female Employees</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.femaleEmployees.toLocaleString()}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">-</td>
+							</tr>
+							<tr style="background: #f9fafb;">
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Social</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Average Training Hours</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.averageTrainingHours}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Hours</td>
+							</tr>
+							<tr>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Social</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Community Investment</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">₹${selectedData.communityInvestmentSpend.toLocaleString()}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">INR</td>
+							</tr>
+							<tr style="background: #f9fafb;">
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Governance</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Independent Board Members</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.independentBoardMembersPercent}%</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">%</td>
+							</tr>
+							<tr>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Governance</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Data Privacy Policy</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">${selectedData.hasDataPrivacyPolicy ? 'Yes' : 'No'}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">-</td>
+							</tr>
+							<tr style="background: #f9fafb;">
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">Financial</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937;">Total Revenue</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #1f2937; font-weight: bold;">₹${selectedData.totalRevenue.toLocaleString()}</td>
+								<td style="border: 1px solid #d1d5db; padding: 12px; color: #6b7280;">INR</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+
+
+				<div style="text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+					<p>This report was generated automatically from the ESG questionnaire data.</p>
+					<p>For questions or support, please contact your ESG team.</p>
+				</div>
+			`;
+
+			// Convert HTML to canvas
+			const canvas = await html2canvas(pdfContainer, {
+				scale: 2,
+				useCORS: true,
+				allowTaint: true,
+				backgroundColor: '#ffffff'
+			});
+
+			// Create PDF
+			const imgData = canvas.toDataURL('image/png');
+			const pdf = new jsPDF('p', 'mm', 'a4');
+			const imgWidth = 210; // A4 width in mm
+			const pageHeight = 295; // A4 height in mm
+			const imgHeight = (canvas.height * imgWidth) / canvas.width;
+			let heightLeft = imgHeight;
+
+			let position = 0;
+
+			// Add first page
+			pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+			heightLeft -= pageHeight;
+
+			// Add additional pages if content is longer than one page
+			while (heightLeft >= 0) {
+				position = heightLeft - imgHeight;
+				pdf.addPage();
+				pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+				heightLeft -= pageHeight;
+			}
+
+			// Save PDF
+			pdf.save(`ESG_Summary_FY${selectedYear}_${new Date().toISOString().split('T')[0]}.pdf`);
+
+			// Clean up
+			document.body.removeChild(pdfContainer);
+
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			alert('Failed to generate PDF. Please try again.');
+		}
 	};
 
 	const handleDownloadExcel = () => {
@@ -438,7 +621,7 @@ const SummaryPage: React.FC = () => {
 													? (
 															selectedData.carbonEmissions /
 															selectedData.totalRevenue
-													  ).toFixed(6)
+													  ).toFixed(2)
 													: "N/A"}
 											</p>
 											<p className="text-xs text-gray-500">
@@ -464,7 +647,7 @@ const SummaryPage: React.FC = () => {
 															(selectedData.renewableElectricityConsumption /
 																selectedData.totalElectricityConsumption) *
 															100
-													  ).toFixed(1)
+													  ).toFixed(2)
 													: "N/A"}
 												%
 											</p>
@@ -490,7 +673,7 @@ const SummaryPage: React.FC = () => {
 															(selectedData.femaleEmployees /
 																selectedData.totalEmployees) *
 															100
-													  ).toFixed(1)
+													  ).toFixed(2)
 													: "N/A"}
 												%
 											</p>
