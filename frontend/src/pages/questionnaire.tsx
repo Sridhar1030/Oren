@@ -14,8 +14,12 @@ import {
 	BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+import { esgAPI, handleApiError, handleApiSuccess } from "@/utils/api";
 
 interface ESGFormData {
+	// Financial Year
+	financialYear: number;
+	
 	// Environmental Metrics
 	totalElectricityConsumption: number;
 	renewableElectricityConsumption: number;
@@ -26,11 +30,11 @@ interface ESGFormData {
 	totalEmployees: number;
 	femaleEmployees: number;
 	averageTrainingHours: number;
-	communityInvestment: number;
+	communityInvestmentSpend: number;
 
 	// Governance Metrics
-	independentBoardMembers: number;
-	hasDataPrivacyPolicy: string;
+	independentBoardMembersPercent: number;
+	hasDataPrivacyPolicy: boolean;
 	totalRevenue: number;
 }
 
@@ -40,6 +44,7 @@ interface ValidationErrors {
 
 const QuestionnairePage: React.FC = () => {
 	const [formData, setFormData] = useState<ESGFormData>({
+		financialYear: new Date().getFullYear(),
 		totalElectricityConsumption: 0,
 		renewableElectricityConsumption: 0,
 		totalFuelConsumption: 0,
@@ -47,9 +52,9 @@ const QuestionnairePage: React.FC = () => {
 		totalEmployees: 0,
 		femaleEmployees: 0,
 		averageTrainingHours: 0,
-		communityInvestment: 0,
-		independentBoardMembers: 0,
-		hasDataPrivacyPolicy: "",
+		communityInvestmentSpend: 0,
+		independentBoardMembersPercent: 0,
+		hasDataPrivacyPolicy: false,
 		totalRevenue: 0,
 	});
 
@@ -73,7 +78,7 @@ const QuestionnairePage: React.FC = () => {
 			: 0;
 	const communitySpendRatio =
 		formData.totalRevenue > 0
-			? (formData.communityInvestment / formData.totalRevenue) * 100
+			? (formData.communityInvestmentSpend / formData.totalRevenue) * 100
 			: 0;
 
 	const validateForm = (): boolean => {
@@ -100,17 +105,12 @@ const QuestionnairePage: React.FC = () => {
 		}
 
 		// Governance validations
-		if (formData.independentBoardMembers > 100) {
-			newErrors.independentBoardMembers = "Percentage cannot exceed 100%";
+		if (formData.independentBoardMembersPercent > 100) {
+			newErrors.independentBoardMembersPercent = "Percentage cannot exceed 100%";
 		}
 
-		if (formData.independentBoardMembers < 0) {
-			newErrors.independentBoardMembers = "Percentage cannot be negative";
-		}
-
-		// Required field validations
-		if (!formData.hasDataPrivacyPolicy) {
-			newErrors.hasDataPrivacyPolicy = "Please select an option";
+		if (formData.independentBoardMembersPercent < 0) {
+			newErrors.independentBoardMembersPercent = "Percentage cannot be negative";
 		}
 
 		setErrors(newErrors);
@@ -123,7 +123,8 @@ const QuestionnairePage: React.FC = () => {
 		const { name, value, type } = e.target;
 		setFormData((prev) => ({
 			...prev,
-			[name]: type === "number" ? parseFloat(value) || 0 : value,
+			[name]: type === "number" ? parseFloat(value) || 0 : 
+					name === "hasDataPrivacyPolicy" ? value === "true" : value,
 		}));
 
 		// Clear error when user starts typing
@@ -142,20 +143,33 @@ const QuestionnairePage: React.FC = () => {
 		setIsSubmitting(true);
 
 		try {
-			
 			console.log("Submitting ESG data:", formData);
 
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			// Make API call to save ESG data
+			const response = await esgAPI.saveResponse(formData);
+			
+			console.log("ESG data saved successfully:", response.data);
+			handleApiSuccess("ESG data saved successfully!");
 
-			// Show success message
-			alert("ESG data saved successfully!");
+			// Reset form
+			setFormData({
+				financialYear: new Date().getFullYear(),
+				totalElectricityConsumption: 0,
+				renewableElectricityConsumption: 0,
+				totalFuelConsumption: 0,
+				carbonEmissions: 0,
+				totalEmployees: 0,
+				femaleEmployees: 0,
+				averageTrainingHours: 0,
+				communityInvestmentSpend: 0,
+				independentBoardMembersPercent: 0,
+				hasDataPrivacyPolicy: false,
+				totalRevenue: 0,
+			});
 
-			// Reset form or redirect
-			// router.push('/dashboard');
 		} catch (error) {
 			console.error("Error saving ESG data:", error);
-			alert("Error saving data. Please try again.");
+			handleApiError(error);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -194,6 +208,40 @@ const QuestionnairePage: React.FC = () => {
 					{/* Form */}
 					<div className="bg-white/90 shadow-xl rounded-2xl p-8">
 						<form onSubmit={handleSubmit} className="space-y-8">
+							{/* Financial Year */}
+							<div className="space-y-6">
+								<h2 className="text-xl font-semibold text-gray-900 flex items-center">
+									<Calendar className="w-5 h-5 mr-2 text-[#BBE8E1]" />
+									Financial Year
+								</h2>
+								<p className="text-gray-600">
+									Select the financial year for this ESG assessment.
+								</p>
+
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+									<div>
+										<label className="block text-sm font-medium text-gray-700 mb-2">
+											Financial Year *{" "}
+											<span className="text-red-500">
+												*
+											</span>
+										</label>
+										<input
+											type="number"
+											name="financialYear"
+											value={formData.financialYear}
+											onChange={handleInputChange}
+											className={getInputClass(
+												"financialYear"
+											)}
+											placeholder="2024"
+											min="2000"
+											max={new Date().getFullYear() + 1}
+										/>
+									</div>
+								</div>
+							</div>
+
 							{/* Environmental Metrics */}
 							<div className="space-y-6">
 								<h2 className="text-xl font-semibold text-gray-900 flex items-center">
@@ -422,11 +470,11 @@ const QuestionnairePage: React.FC = () => {
 										</label>
 										<input
 											type="number"
-											name="communityInvestment"
-											value={formData.communityInvestment}
+											name="communityInvestmentSpend"
+											value={formData.communityInvestmentSpend}
 											onChange={handleInputChange}
 											className={getInputClass(
-												"communityInvestment"
+												"communityInvestmentSpend"
 											)}
 											placeholder="0.00"
 											min="0"
@@ -460,13 +508,13 @@ const QuestionnairePage: React.FC = () => {
 										</label>
 										<input
 											type="number"
-											name="independentBoardMembers"
+											name="independentBoardMembersPercent"
 											value={
-												formData.independentBoardMembers
+												formData.independentBoardMembersPercent
 											}
 											onChange={handleInputChange}
 											className={getInputClass(
-												"independentBoardMembers"
+												"independentBoardMembersPercent"
 											)}
 											placeholder="0.0"
 											min="0"
@@ -476,10 +524,10 @@ const QuestionnairePage: React.FC = () => {
 										<span className="text-sm text-gray-500">
 											%
 										</span>
-										{errors.independentBoardMembers && (
+										{errors.independentBoardMembersPercent && (
 											<div className="flex items-center mt-1 text-red-600 text-sm">
 												<AlertCircle className="w-4 h-4 mr-1" />
-												{errors.independentBoardMembers}
+												{errors.independentBoardMembersPercent}
 											</div>
 										)}
 									</div>
@@ -494,18 +542,18 @@ const QuestionnairePage: React.FC = () => {
 										<select
 											name="hasDataPrivacyPolicy"
 											value={
-												formData.hasDataPrivacyPolicy
+												formData.hasDataPrivacyPolicy ? "true" : "false"
 											}
 											onChange={handleInputChange}
 											className={getInputClass(
 												"hasDataPrivacyPolicy"
 											)}
 										>
-											<option value="">
+											<option value="false">
 												Select an option
 											</option>
-											<option value="yes">Yes</option>
-											<option value="no">No</option>
+											<option value="true">Yes</option>
+											<option value="false">No</option>
 										</select>
 										{errors.hasDataPrivacyPolicy && (
 											<div className="flex items-center mt-1 text-red-600 text-sm">
