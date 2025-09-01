@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
+import React, { useState, useEffect, useContext, createContext, ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { authAPI, handleApiError, handleApiSuccess } from '@/utils/api';
@@ -28,7 +28,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -46,7 +46,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(parsedUser);
       } catch (error) {
         console.error('Error parsing user data:', error);
-        logout();
+        // Clear invalid data
+        localStorage.removeItem('user');
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
       }
     }
     
