@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { Toaster } from 'react-hot-toast';
@@ -15,6 +16,9 @@ const Layout: React.FC<LayoutProps> = ({
   title = 'Oren ESG', 
   description = 'ESG Questionnaire and Sustainability Data Management Platform' 
 }) => {
+  const router = useRouter();
+  const isAuthPage = router.pathname.startsWith('/auth/');
+
   return (
     <>
       <Head>
@@ -24,15 +28,23 @@ const Layout: React.FC<LayoutProps> = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        
-        <main className="flex-1">
+      {isAuthPage ? (
+        // Auth pages get full control without Navbar/Footer
+        <div className="min-h-screen">
           {children}
-        </main>
-        
-        <Footer />
-      </div>
+        </div>
+      ) : (
+        // Regular pages get the full layout
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          
+          <main className="flex-1">
+            {children}
+          </main>
+          
+          <Footer />
+        </div>
+      )}
       
       <Toaster
         position="top-right"

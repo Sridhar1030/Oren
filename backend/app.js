@@ -13,15 +13,26 @@ app.use(helmet());
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
 	max: 100, // limit each IP to 100 requests per windowMs
-	message: "Too many requests from this IP, please try again later."
+	message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter);
 
 // CORS configuration
-app.use(cors({
-	origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-	credentials: true,
-}));
+// Enable CORS for all origins with credentials support
+app.use(
+	cors({
+		origin: function (origin, callback) {
+			// Allow requests with no origin (like mobile apps or Postman)
+			if (!origin) return callback(null, true);
+			
+			// Allow all origins
+			callback(null, true);
+		},
+		credentials: true,
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+	})
+);
 
 // Body parsing middleware
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -59,7 +70,7 @@ app.use((error, req, res, next) => {
 	res.status(statusCode).json({
 		status: "error",
 		message: error.message,
-		...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+		...(process.env.NODE_ENV === "development" && { stack: error.stack }),
 	});
 });
 

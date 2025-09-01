@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, createContext, ReactNode } from
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { authAPI, handleApiError, handleApiSuccess } from '@/utils/api';
+import Layout from '@/components/Layout/Layout';
 
 interface User {
   id: string;
@@ -134,7 +135,7 @@ export const useAuth = () => {
 };
 
 // Higher-order component for protected routes
-export const withAuth = (WrappedComponent: React.ComponentType) => {
+export const withAuth = (WrappedComponent: React.ComponentType, options: { title?: string } = {}) => {
   return function AuthenticatedComponent(props: any) {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
@@ -147,9 +148,14 @@ export const withAuth = (WrappedComponent: React.ComponentType) => {
 
     if (isLoading) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="loading-spinner"></div>
-        </div>
+        <Layout title={options.title || "Loading..."}>
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#BBE8E1] mx-auto mb-4"></div>
+              <p className="text-gray-600">Checking authentication...</p>
+            </div>
+          </div>
+        </Layout>
       );
     }
 

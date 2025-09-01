@@ -61,7 +61,10 @@ const saveESGResponse = asyncHandler(async (req, res) => {
 // Get all ESG responses for the authenticated user
 const getESGResponses = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
-
+	if (!userId) {
+		res.status(401);
+		throw new Error("Unauthorized request");
+	}
 	try {
 		const responses = await ESGService.getByUserId(userId);
 

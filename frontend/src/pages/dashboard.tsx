@@ -31,44 +31,45 @@ interface ESGSummary {
 const DashboardPage: React.FC = () => {
   const [summary, setSummary] = useState<ESGSummary | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchSummary();
-  }, []);
-
-  const fetchSummary = async () => {
-    try {
-      const response = await esgAPI.getSummary();
-      setSummary(response.data.data);
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const pieData = [
-    { name: 'Environmental', value: 35, color: '#14b8a6' },
-    { name: 'Social', value: 40, color: '#06b6d4' },
-    { name: 'Governance', value: 25, color: '#8b5cf6' },
-  ];
+  return (
+    <Layout title="Dashboard - Oren ESG">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B] py-12 px-4">
+        <div className="w-full max-w-4xl bg-white/90 shadow-2xl rounded-3xl p-10 flex flex-col items-center">
+          <div className="w-16 h-2 bg-[#BBE8E1] mb-8 rounded" />
+          <h1 className="text-5xl font-extrabold mb-2 text-center text-gray-800">Dashboard</h1>
+          <p className="mb-8 text-center text-gray-500 text-lg">Welcome to your dashboard!</p>
+          <div className="w-full bg-[#F5FCFA] rounded-xl p-8 shadow flex flex-col items-center">
+            <h2 className="text-2xl font-bold mb-4 text-[#14b8a6]">Overview</h2>
+            <p className="text-gray-700">This is your dashboard. You can add widgets and more content here.</p>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
 
   if (loading) {
     return (
       <Layout title="Dashboard - Oren ESG">
         <div className="min-h-screen flex items-center justify-center">
-          <div className="loading-spinner"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
         </div>
       </Layout>
     );
   }
 
   const latestData = summary?.latestResponse;
-  const hasData = summary && summary.totalResponses > 0;
+  const hasData = summary && (summary.totalResponses ?? 0) > 0;
+
+  // Define pie chart data for ESG distribution
+  const pieData = [
+    { name: 'Environmental', value: 35, color: '#10b981' },
+    { name: 'Social', value: 40, color: '#3b82f6' },
+    { name: 'Governance', value: 25, color: '#8b5cf6' }
+  ];
 
   return (
     <Layout title="Dashboard - Oren ESG">
-      <div className="container-custom py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div>
@@ -78,11 +79,11 @@ const DashboardPage: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-4 mt-4 lg:mt-0">
-            <Link href="/questionnaire" className="btn-primary flex items-center space-x-2">
+            <Link href="/questionnaire" className="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2">
               <Plus className="w-4 h-4" />
               <span>Add Data</span>
             </Link>
-            <button className="btn-secondary flex items-center space-x-2">
+            <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2">
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
@@ -101,7 +102,7 @@ const DashboardPage: React.FC = () => {
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Start by filling out your first ESG questionnaire to see your sustainability metrics and insights.
             </p>
-            <Link href="/questionnaire" className="btn-primary inline-flex items-center space-x-2">
+            <Link href="/questionnaire" className="bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-lg transition-colors inline-flex items-center space-x-2">
               <Plus className="w-5 h-5" />
               <span>Fill ESG Questionnaire</span>
             </Link>
@@ -110,8 +111,8 @@ const DashboardPage: React.FC = () => {
           <>
             {/* Key Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="card">
-                <div className="card-body">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Carbon Intensity</p>
@@ -127,8 +128,8 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="card">
-                <div className="card-body">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Renewable Energy</p>
@@ -144,8 +145,8 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="card">
-                <div className="card-body">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Diversity Ratio</p>
@@ -161,8 +162,8 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="card">
-                <div className="card-body">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Community Spend</p>
@@ -182,12 +183,12 @@ const DashboardPage: React.FC = () => {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Carbon Emissions Trend */}
-              <div className="chart-container">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Carbon Emissions Trend
                 </h3>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={summary.trends.carbonEmissions}>
+                  <LineChart data={summary?.trends?.carbonEmissions || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="year" />
                     <YAxis />
@@ -204,12 +205,12 @@ const DashboardPage: React.FC = () => {
               </div>
 
               {/* Revenue Trend */}
-              <div className="chart-container">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Revenue Growth
                 </h3>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={summary.trends.totalRevenue}>
+                  <BarChart data={summary?.trends?.totalRevenue || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="year" />
                     <YAxis />
@@ -223,7 +224,7 @@ const DashboardPage: React.FC = () => {
             {/* ESG Distribution and Recent Activity */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* ESG Distribution */}
-              <div className="chart-container">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   ESG Focus Distribution
                 </h3>
@@ -261,15 +262,15 @@ const DashboardPage: React.FC = () => {
               </div>
 
               {/* Recent Activity */}
-              <div className="card">
-                <div className="card-header">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Recent Activity
                   </h3>
                 </div>
-                <div className="card-body">
+                <div className="space-y-4">
                   <div className="space-y-4">
-                    {summary.financialYears.slice(0, 5).map((year, index) => (
+                    {summary?.financialYears?.slice(0, 5).map((year, index) => (
                       <div key={year} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -286,7 +287,7 @@ const DashboardPage: React.FC = () => {
                         </div>
                         <Link 
                           href={`/questionnaire?year=${year}`}
-                          className="btn-ghost text-sm flex items-center space-x-1"
+                          className="text-primary-600 hover:text-primary-700 text-sm flex items-center space-x-1 transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                           <span>View</span>
@@ -304,4 +305,5 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default withAuth(DashboardPage);
+export default withAuth(DashboardPage, { title: "Dashboard - Oren ESG" });
+  

@@ -50,22 +50,23 @@ const HomePage: React.FC = () => {
   return (
     <Layout title="Oren ESG - Sustainability Data Management Platform">
       {/* Hero Section */}
+      
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-primary-100"></div>
-        <div className="relative container-custom py-20 lg:py-28">
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-white to-teal-100"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-large">
+              <div className="w-20 h-20 bg-gradient-to-r from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <BarChart3 className="w-10 h-10 text-white" />
               </div>
             </div>
             
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
               All Your{' '}
-              <span className="gradient-text">Sustainability Data</span>
+              <span className="bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent">Sustainability Data</span>
               <br />
               and Stakeholders{' '}
-              <span className="gradient-text">Connected</span>
+              <span className="bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent">Connected</span>
               <br />
               in One Place
             </h1>
@@ -77,17 +78,17 @@ const HomePage: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isAuthenticated ? (
-                <Link href="/dashboard" className="btn-primary inline-flex items-center space-x-2">
+                <Link href="/dashboard" className="bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 shadow-sm hover:shadow-md inline-flex items-center space-x-2">
                   <span>Go to Dashboard</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               ) : (
                 <>
-                  <Link href="/auth/register" className="btn-primary inline-flex items-center space-x-2">
+                  <Link href="/auth/register" className="bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 shadow-sm hover:shadow-md inline-flex items-center space-x-2">
                     <span>Get Started Free</span>
                     <ArrowRight className="w-5 h-5" />
                   </Link>
-                  <Link href="/auth/login" className="btn-secondary">
+                  <Link href="/auth/login" className="bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg border border-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 shadow-sm hover:shadow-md">
                     Sign In
                   </Link>
                 </>
@@ -99,7 +100,7 @@ const HomePage: React.FC = () => {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="container-custom">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Everything you need for ESG reporting
@@ -111,18 +112,16 @@ const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="card hover:scale-105 transition-transform duration-300">
-                <div className="card-body">
-                  <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 mb-4">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {feature.description}
-                  </p>
+              <div key={index} className="bg-white rounded-xl transition-all duration-300 border border-gray-100 shadow-sm hover:shadow-md hover:scale-105 p-6">
+                <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center text-teal-600 mb-4">
+                  {feature.icon}
                 </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -130,8 +129,8 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Metrics Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-50 to-primary-100">
-        <div className="container-custom">
+      <section className="py-20 bg-gradient-to-r from-teal-50 to-teal-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Auto-calculated ESG Metrics
@@ -143,15 +142,13 @@ const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {metrics.map((metric, index) => (
-              <div key={index} className="card bg-white/80 backdrop-blur-sm">
-                <div className="card-body text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {metric.label}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {metric.description}
-                  </p>
-                </div>
+              <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl transition-all duration-300 border border-gray-100 shadow-sm hover:shadow-md p-6 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {metric.label}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {metric.description}
+                </p>
               </div>
             ))}
           </div>
@@ -160,7 +157,7 @@ const HomePage: React.FC = () => {
 
       {/* CTA Section */}
       <section className="py-20 bg-white">
-        <div className="container-custom">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
               Ready to start your ESG journey?
@@ -171,11 +168,11 @@ const HomePage: React.FC = () => {
             
             {!isAuthenticated && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/auth/register" className="btn-primary inline-flex items-center space-x-2">
+                <Link href="/auth/register" className="bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 shadow-sm hover:shadow-md inline-flex items-center space-x-2">
                   <span>Start Free Trial</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-                <Link href="/auth/login" className="btn-secondary">
+                <Link href="/auth/login" className="bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg border border-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 shadow-sm hover:shadow-md">
                   Sign In to Existing Account
                 </Link>
               </div>

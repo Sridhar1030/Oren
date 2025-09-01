@@ -22,15 +22,15 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-soft border-b border-gray-100 sticky top-0 z-50">
-      <div className="container-custom">
+    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">Oren ESG</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent">Oren ESG</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -44,7 +44,9 @@ const Navbar: React.FC = () => {
                   key={link.href}
                   href={link.href}
                   className={`${
-                    isActive ? 'nav-link-active' : 'nav-link'
+                    isActive 
+                      ? 'text-teal-600 font-semibold' 
+                      : 'text-gray-600 hover:text-teal-600 font-medium transition-colors duration-200'
                   }`}
                 >
                   {link.label}
@@ -63,7 +65,7 @@ const Navbar: React.FC = () => {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="btn-ghost flex items-center space-x-1"
+                  className="bg-transparent hover:bg-teal-50 text-teal-600 font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 flex items-center space-x-1"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
@@ -71,10 +73,10 @@ const Navbar: React.FC = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link href="/auth/login" className="nav-link">
+                <Link href="/auth/login" className="text-gray-600 hover:text-teal-600 font-medium transition-colors duration-200">
                   Login
                 </Link>
-                <Link href="/auth/register" className="btn-primary">
+                <Link href="/auth/register" className="bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 shadow-sm hover:shadow-md">
                   Sign Up
                 </Link>
               </div>
@@ -110,8 +112,8 @@ const Navbar: React.FC = () => {
                     href={link.href}
                     className={`px-3 py-2 rounded-lg ${
                       isActive
-                        ? 'text-primary-600 bg-primary-50 font-semibold'
-                        : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
+                        ? 'text-teal-600 bg-teal-50 font-semibold'
+                        : 'text-gray-600 hover:text-teal-600 hover:bg-teal-50'
                     } transition-colors`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -139,14 +141,14 @@ const Navbar: React.FC = () => {
                   <div className="space-y-2">
                     <Link
                       href="/auth/login"
-                      className="block px-3 py-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      className="block px-3 py-2 text-gray-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       href="/auth/register"
-                      className="block btn-primary text-center"
+                      className="block bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 text-center shadow-sm hover:shadow-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Sign Up
