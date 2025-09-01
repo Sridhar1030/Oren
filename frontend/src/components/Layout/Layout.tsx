@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { Toaster } from 'react-hot-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({
   description = 'ESG Questionnaire and Sustainability Data Management Platform' 
 }) => {
   const router = useRouter();
+  const { isLoading } = useAuth();
   const isAuthPage = router.pathname.startsWith('/auth/');
 
   return (
@@ -36,7 +38,8 @@ const Layout: React.FC<LayoutProps> = ({
       ) : (
         // Regular pages get the full layout
         <div className="min-h-screen flex flex-col">
-          <Navbar />
+          {/* Only render Navbar when authentication state is determined */}
+          {!isLoading && <Navbar />}
           
           <main className="flex-1">
             {children}

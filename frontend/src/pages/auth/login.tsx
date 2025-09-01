@@ -23,8 +23,8 @@ const LoginPage: React.FC = () => {
 	} = useForm<LoginForm>();
 
 	// Demo credentials
-	const demoEmail = "sridhar@gmail.com";
-	const demoPassword = "sridhar1090";
+	const demoEmail = "sri@gmail.com";
+	const demoPassword = "123456";
 
 	const onSubmit = async (data: LoginForm) => {
 		const success = await login(data.email, data.password);

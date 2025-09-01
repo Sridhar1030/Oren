@@ -5,7 +5,18 @@ import Layout from '@/components/Layout/Layout';
 import { useAuth } from '@/hooks/useAuth';
 
 const HomePage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show loading state while determining authentication
+  if (isLoading) {
+    return (
+      <Layout title="Oren ESG - Sustainability Data Management Platform">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   const features = [
     {

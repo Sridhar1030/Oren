@@ -1,18 +1,16 @@
 import axios, { AxiosResponse } from 'axios';
-import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
 // Create axios instance
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   timeout: 10000,
-  withCredentials: true,
 });
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('accessToken');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,9 +28,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth tokens and redirect to login
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
+      // Clear auth token and redirect to login
+      localStorage.removeItem('accessToken');
       if (typeof window !== 'undefined') {
         window.location.href = '/auth/login';
       }

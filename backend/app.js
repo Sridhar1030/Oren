@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
@@ -18,7 +17,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS configuration
-// Enable CORS for all origins with credentials support
+// Enable CORS for all origins
 app.use(
 	cors({
 		origin: function (origin, callback) {
@@ -28,16 +27,14 @@ app.use(
 			// Allow all origins
 			callback(null, true);
 		},
-		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+		allowedHeaders: ["Content-Type", "Authorization"],
 	})
 );
 
 // Body parsing middleware
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.json({ limit: "16kb" }));
-app.use(cookieParser());
 
 // Import routes
 import { userRouter } from "./routes/user.routes.js";

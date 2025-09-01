@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   BarChart3, 
@@ -15,6 +15,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import Layout from '@/components/Layout/Layout';
 import { withAuth } from '@/hooks/useAuth';
 import { esgAPI, handleApiError } from '@/utils/api';
+import { downloadPDF, downloadExcel, downloadTemplatePDF, downloadTemplateExcel, getCompanyName } from '@/utils/exportUtils';
+import toast from 'react-hot-toast';
 
 interface ESGSummary {
   totalResponses: number;
@@ -31,22 +33,40 @@ interface ESGSummary {
 const DashboardPage: React.FC = () => {
   const [summary, setSummary] = useState<ESGSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  return (
-    <Layout title="Dashboard - Oren ESG">
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#BBE8E1] via-white to-[#F5CD6B] py-12 px-4">
-        <div className="w-full max-w-4xl bg-white/90 shadow-2xl rounded-3xl p-10 flex flex-col items-center">
-          <div className="w-16 h-2 bg-[#BBE8E1] mb-8 rounded" />
-          <h1 className="text-5xl font-extrabold mb-2 text-center text-gray-800">Dashboard</h1>
-          <p className="mb-8 text-center text-gray-500 text-lg">Welcome to your dashboard!</p>
-          <div className="w-full bg-[#F5FCFA] rounded-xl p-8 shadow flex flex-col items-center">
-            <h2 className="text-2xl font-bold mb-4 text-[#14b8a6]">Overview</h2>
-            <p className="text-gray-700">This is your dashboard. You can add widgets and more content here.</p>
-          </div>
-        </div>
-      </div>
-    </Layout>
-  );
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const response = await esgAPI.getSummary();
+        setSummary(response.data);
+      } catch (error) {
+        console.error('Error fetching ESG summary:', error);
+        handleApiError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSummary();
+  }, []);
+
+  // Show loading state while fetching data
   if (loading) {
     return (
       <Layout title="Dashboard - Oren ESG">
@@ -57,6 +77,7 @@ const DashboardPage: React.FC = () => {
     );
   }
 
+  // Only access summary data after loading is complete
   const latestData = summary?.latestResponse;
   const hasData = summary && (summary.totalResponses ?? 0) > 0;
 
@@ -66,6 +87,70 @@ const DashboardPage: React.FC = () => {
     { name: 'Social', value: 40, color: '#3b82f6' },
     { name: 'Governance', value: 25, color: '#8b5cf6' }
   ];
+
+  // Export functions
+  const handleExportPDF = async () => {
+    if (!summary) return;
+    
+    setExportLoading(true);
+    try {
+      const companyName = getCompanyName();
+      downloadPDF(summary, { companyName });
+      toast.success('PDF exported successfully!');
+      setExportDropdownOpen(false);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Failed to export PDF');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!summary) return;
+    
+    setExportLoading(true);
+    try {
+      const companyName = getCompanyName();
+      downloadExcel(summary, { companyName });
+      toast.success('Excel file exported successfully!');
+      setExportDropdownOpen(false);
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      toast.error('Failed to export Excel file');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  // Template export functions for when no data exists
+  const handleExportTemplatePDF = async () => {
+    setExportLoading(true);
+    try {
+      const companyName = getCompanyName();
+      downloadTemplatePDF({ companyName });
+      toast.success('Template PDF exported successfully!');
+    } catch (error) {
+      console.error('Error exporting template PDF:', error);
+      toast.error('Failed to export template PDF');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportTemplateExcel = async () => {
+    setExportLoading(true);
+    try {
+      const companyName = getCompanyName();
+      downloadTemplateExcel({ companyName });
+      toast.success('Template Excel exported successfully!');
+    } catch (error) {
+      console.error('Error exporting template Excel:', error);
+      toast.error('Failed to export template Excel');
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   return (
     <Layout title="Dashboard - Oren ESG">
@@ -83,10 +168,71 @@ const DashboardPage: React.FC = () => {
               <Plus className="w-4 h-4" />
               <span>Add Data</span>
             </Link>
-            <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2">
-              <Download className="w-4 h-4" />
-              <span>Export</span>
-            </button>
+            <div className="relative" ref={exportDropdownRef}>
+              <button 
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2"
+                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Export Dropdown */}
+              {exportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                  <div className="py-1">
+                    <button
+                      onClick={handleExportPDF}
+                      disabled={exportLoading}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {exportLoading ? (
+                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      <span>Export as PDF</span>
+                    </button>
+                    <button
+                      onClick={handleExportExcel}
+                      disabled={exportLoading}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {exportLoading ? (
+                        <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      <span>Export as Excel</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (summary) {
+                          const companyName = getCompanyName();
+                          downloadPDF(summary, { companyName, reportType: 'detailed' });
+                          toast.success('Detailed PDF exported successfully!');
+                          setExportDropdownOpen(false);
+                        }
+                      }}
+                      disabled={exportLoading || !summary}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                      <span>Detailed Report (PDF)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -102,10 +248,30 @@ const DashboardPage: React.FC = () => {
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Start by filling out your first ESG questionnaire to see your sustainability metrics and insights.
             </p>
-            <Link href="/questionnaire" className="bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-lg transition-colors inline-flex items-center space-x-2">
-              <Plus className="w-5 h-5" />
-              <span>Fill ESG Questionnaire</span>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/questionnaire" className="bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-lg transition-colors inline-flex items-center space-x-2">
+                <Plus className="w-5 h-5" />
+                <span>Fill ESG Questionnaire</span>
+              </Link>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button 
+                  onClick={handleExportTemplatePDF}
+                  disabled={exportLoading}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors inline-flex items-center space-x-2 disabled:opacity-50"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>Template PDF</span>
+                </button>
+                <button 
+                  onClick={handleExportTemplateExcel}
+                  disabled={exportLoading}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors inline-flex items-center space-x-2 disabled:opacity-50"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>Template Excel</span>
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <>
@@ -270,7 +436,7 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-4">
-                    {summary?.financialYears?.slice(0, 5).map((year, index) => (
+                    {(summary?.financialYears || []).slice(0, 5).map((year, index) => (
                       <div key={year} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
