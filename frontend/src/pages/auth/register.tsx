@@ -193,20 +193,20 @@ const RegisterPage: React.FC = () => {
 
             {/* Terms and Conditions */}
             <div className="flex items-start space-x-3">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-[#BBE8E1] focus:ring-[#BBE8E1] border-gray-300 rounded mt-1"
-              />
+                              <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  required
+                  className="h-4 w-4 text-blue-400 focus:ring-blue-400 border-gray-300 rounded mt-1"
+                />
               <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed">
                 I agree to the{' '}
-                <Link href="/terms" className="text-[#BBE8E1] hover:text-[#F5CD6B] transition-colors">
+                <Link href="/terms" className="text-blue-400 hover:text-blue-600 transition-colors">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-[#BBE8E1] hover:text-[#F5CD6B] transition-colors">
+                <Link href="/privacy" className="text-blue-400 hover:text-blue-600 transition-colors">
                   Privacy Policy
                 </Link>
               </label>
@@ -216,7 +216,7 @@ const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#BBE8E1] hover:bg-[#A8D8D1] text-white font-semibold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-400 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </button>
@@ -226,7 +226,7 @@ const RegisterPage: React.FC = () => {
           <div className="text-center mt-8">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <Link href="/auth/login" className="text-[#BBE8E1] hover:text-[#F5CD6B] font-medium transition-colors">
+              <Link href="/auth/login" className="text-blue-400 hover:text-blue-600 font-medium transition-colors">
                 Sign in
               </Link>
             </p>

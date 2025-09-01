@@ -106,9 +106,9 @@ const LoginPage: React.FC = () => {
 						{/* Remember me and Forgot password */}
 						<div className="flex items-center justify-between">
 							<label className="flex items-center text-sm text-gray-600">
-								<input type="checkbox" className="mr-2 accent-[#BBE8E1]" /> Remember me
+								<input type="checkbox" className="mr-2 accent-blue-400" /> Remember me
 							</label>
-							<Link href="#" className="text-sm text-[#BBE8E1] hover:text-[#F5CD6B] transition-colors">
+							<Link href="#" className="text-sm text-blue-400 hover:text-blue-600 transition-colors">
 								Forgot password?
 							</Link>
 						</div>
@@ -124,20 +124,20 @@ const LoginPage: React.FC = () => {
 					</form>
 
 					{/* Demo Credentials */}
-					<div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+					<div className="mt-6 bg-gray-500 text-white font-bold border border-gray-200 rounded-lg p-4">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm text-gray-700 font-semibold">Demo Credentials:</span>
+							<span className="text-sm  font-semibold">Demo Credentials:</span>
 							<button
 								type="button"
 								onClick={handleFillDemo}
-								className="text-xs bg-[#BBE8E1] hover:bg-[#A8D8D1] text-white px-2 py-1 rounded transition-colors"
+								className="text-xs bg-blue-400 hover:bg-blue-600 text-white px-2 py-1 rounded transition-colors"
 							>
 								Fill Demo Login
 							</button>
 						</div>
-						<div className="flex flex-col gap-1 text-xs text-gray-600">
-							<div>Email: <span className="text-[#BBE8E1] font-medium">{demoEmail}</span></div>
-							<div>Password: <span className="text-[#BBE8E1] font-medium">{demoPassword}</span></div>
+						<div className="flex flex-col gap-1 text-xs">
+							<div>Email: <span className="text-yellow-400 font-medium">{demoEmail}</span></div>
+							<div>Password: <span className="text-yellow-400 font-medium">{demoPassword}</span></div>
 						</div>
 					</div>
 
@@ -145,7 +145,7 @@ const LoginPage: React.FC = () => {
 					<div className="text-center mt-8">
 						<p className="text-gray-600">
 							Don't have an account?{' '}
-							<Link href="/auth/register" className="text-[#BBE8E1] hover:text-[#F5CD6B] font-medium transition-colors">
+							<Link href="/auth/register" className="text-blue-400 hover:text-blue-600 font-medium transition-colors">
 								Sign up
 							</Link>
 						</p>
