@@ -1,0 +1,64 @@
+// This is your Prisma schema file for SQLite (easier setup)
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  fullName     String
+  password     String
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationship to ESG responses
+  esgResponses ESGResponse[]
+
+  @@map("users")
+}
+
+model ESGResponse {
+  id           String   @id @default(cuid())
+  userId       String
+  financialYear Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // User relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Environmental metrics
+  totalElectricityConsumption    Float?
+  renewableElectricityConsumption Float?
+  totalFuelConsumption           Float?
+  carbonEmissions                Float?
+
+  // Social metrics
+  totalEmployees                  Int?
+  femaleEmployees                Int?
+  averageTrainingHours           Float?
+  communityInvestmentSpend       Float?
+
+  // Governance metrics
+  independentBoardMembersPercent Float?
+  hasDataPrivacyPolicy           Boolean?
+  totalRevenue                   Float?
+
+  // Auto-calculated metrics (stored for performance)
+  carbonIntensity           Float?
+  renewableElectricityRatio Float?
+  diversityRatio            Float?
+  communitySpendRatio       Float?
+
+  @@unique([userId, financialYear])
+  @@map("esg_responses")
+}

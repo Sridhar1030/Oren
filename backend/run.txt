@@ -1,0 +1,110 @@
+# ESG Questionnaire Backend - Setup and Run Commands
+
+## STEP 1: CREATE ENVIRONMENT FILE
+# Create .env file in F:\WEBDEV\Oren\backend\ with this content:
+
+PORT=8000
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
+ACCESS_TOKEN_SECRET=your_super_secret_access_token_key_here_make_it_long_and_random_12345678901234567890
+ACCESS_TOKEN_EXPIRY=15m
+REFRESH_TOKEN_SECRET=your_super_secret_refresh_token_key_here_make_it_different_from_access_09876543210987654321
+REFRESH_TOKEN_EXPIRY=7d
+
+## STEP 2: NAVIGATE TO BACKEND DIRECTORY
+cd F:\WEBDEV\Oren\backend
+
+## STEP 3: INSTALL DEPENDENCIES (if not already done)
+npm install
+
+## STEP 4: SETUP DATABASE
+# Generate Prisma client
+npx prisma generate
+
+# Create database and tables (SQLite - no external database needed)
+npx prisma db push
+
+# (Optional) Add sample test data
+npx prisma db seed
+
+## STEP 5: START THE SERVER
+# Development mode (with auto-restart)
+npm run dev
+
+# OR Production mode
+npm start
+
+## STEP 6: VERIFY SERVER IS RUNNING
+# Open browser or use curl to test:
+# http://localhost:8000/health
+
+## TESTING COMMANDS (run in separate terminal)
+
+# Health check
+curl -X GET http://localhost:8000/health
+
+# Get ESG metadata
+curl -X GET http://localhost:8000/api/v1/esg/metadata
+
+# Register a test user
+curl -X POST http://localhost:8000/api/v1/auth/register -H "Content-Type: application/json" -d "{\"username\": \"testuser\", \"email\": \"test@example.com\", \"fullName\": \"Test User\", \"password\": \"password123\"}"
+
+# Login user (save the accessToken from response)
+curl -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"email\": \"test@example.com\", \"password\": \"password123\"}"
+
+# Save ESG data (replace YOUR_ACCESS_TOKEN with actual token from login)
+curl -X POST http://localhost:8000/api/v1/esg/responses -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_ACCESS_TOKEN" -d "{\"financialYear\": 2023, \"totalElectricityConsumption\": 1000000, \"renewableElectricityConsumption\": 250000, \"carbonEmissions\": 1500, \"totalEmployees\": 100, \"femaleEmployees\": 45, \"totalRevenue\": 10000000, \"hasDataPrivacyPolicy\": true}"
+
+# Get all ESG responses
+curl -X GET http://localhost:8000/api/v1/esg/responses -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get ESG summary
+curl -X GET http://localhost:8000/api/v1/esg/summary -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+## USEFUL DEVELOPMENT COMMANDS
+
+# View database in browser (Prisma Studio)
+npx prisma studio
+
+# Reset database (delete all data)
+npx prisma db push --force-reset
+
+# Re-seed database
+npx prisma db seed
+
+## TROUBLESHOOTING
+
+# If you get "table does not exist" error:
+npx prisma generate
+npx prisma db push
+
+# If you get port already in use:
+# Change PORT in .env file or kill process on port 8000
+
+# View server logs for debugging
+# Check terminal where "npm run dev" is running
+
+## API ENDPOINTS AVAILABLE
+
+Authentication:
+- POST /api/v1/auth/register - Register new user
+- POST /api/v1/auth/login - Login user
+- GET /api/v1/auth/logout - Logout user (requires auth)
+
+ESG Data:
+- GET /api/v1/esg/metadata - Get ESG metrics info (public)
+- GET /api/v1/esg/responses - Get all user's ESG data (requires auth)
+- POST /api/v1/esg/responses - Save/update ESG data (requires auth)
+- GET /api/v1/esg/responses/:year - Get ESG data for specific year (requires auth)
+- DELETE /api/v1/esg/responses/:year - Delete ESG data (requires auth)
+- GET /api/v1/esg/years - Get all years with data (requires auth)
+- GET /api/v1/esg/summary - Get dashboard summary (requires auth)
+
+Utility:
+- GET /health - Health check
+
+## SERVER SHOULD BE RUNNING ON:
+http://localhost:8000
+
+## DATABASE FILE LOCATION (SQLite):
+F:\WEBDEV\Oren\backend\prisma\dev.db
