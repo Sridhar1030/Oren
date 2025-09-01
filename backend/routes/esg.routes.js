@@ -8,6 +8,7 @@ import {
 	deleteESGResponse,
 	getFinancialYears,
 	getESGSummary,
+	processAIResponse,
 } from "../controllers/esg.controller.js";
 
 const esgRouter = Router();
@@ -32,5 +33,7 @@ esgRouter
 // Utility routes
 esgRouter.route("/years").get(getFinancialYears); // GET /api/v1/esg/years - Get all years with data
 esgRouter.route("/summary").get(getESGSummary); // GET /api/v1/esg/summary - Get dashboard summary
+
+esgRouter.route("/ai").post(processAIResponse); // POST /api/v1/esg/ai-response - Get AI response
 
 export { esgRouter };

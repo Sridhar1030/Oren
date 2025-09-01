@@ -16,9 +16,10 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { href: '/', label: 'Home', public: true },
-    { href: '/dashboard', label: 'Dashboard', public: false },
+    // { href: '/', label: 'Dashboard', public: false },
     { href: '/questionnaire', label: 'ESG Questionnaire', public: false },
-    { href: '/reports', label: 'Reports', public: false },
+    { href: '/upload-pdf', label: 'Upload PDF', public: false },
+    { href: '/questionnaire/summary', label: 'Summary', public: false },
   ];
 
   return (

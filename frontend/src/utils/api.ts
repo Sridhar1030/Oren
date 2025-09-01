@@ -73,6 +73,8 @@ export const esgAPI = {
   getFinancialYears: () => api.get('/api/v1/esg/years'),
   
   getSummary: () => api.get('/api/v1/esg/summary'),
+  
+  sendToAI: (data: { text: string }) => api.post('/api/v1/esg/ai', data),
 };
 
 // Utility functions

@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
 	const onSubmit = async (data: LoginForm) => {
 		const success = await login(data.email, data.password);
 		if (success) {
-			router.push("/dashboard");
+			        router.push("/");
 		}
 	};
 

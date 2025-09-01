@@ -190,11 +190,11 @@ const QuestionnairePage: React.FC = () => {
 					{/* Header */}
 					<div className="mb-8">
 						<Link
-							href="/dashboard"
+							                href="/"
 							className="inline-flex items-center text-[#BBE8E1] hover:text-[#A8D8D1] mb-4 transition-colors"
 						>
 							<ArrowLeft className="w-4 h-4 mr-2" />
-							Back to Dashboard
+							Back to Home
 						</Link>
 						<h1 className="text-3xl font-bold text-gray-900 mb-2">
 							ESG Questionnaire
@@ -685,7 +685,7 @@ const QuestionnairePage: React.FC = () => {
 										className="inline-flex items-center text-[#BBE8E1] hover:text-[#A8D8D1] font-medium transition-colors"
 									>
 										<BarChart3 className="w-4 h-4 mr-2" />
-										View ESG Summary Dashboard
+										View ESG Summary
 									</Link>
 								</div>
 							</div>

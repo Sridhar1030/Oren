@@ -1,10 +1,10 @@
 import { ESGService } from "../models/esg.models.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+import { AIResponseMiddleware } from "../middlewares/ai.middlewares.js";
 // Get ESG metrics metadata
 const getMetricsMetadata = asyncHandler(async (req, res) => {
 	const metadata = ESGService.getMetricsMetadata();
-	
+
 	res.status(200).json({
 		message: "ESG metrics metadata retrieved successfully",
 		data: metadata,
@@ -17,7 +17,7 @@ const saveESGResponse = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
 
 	// Validate financial year
-	if (!financialYear || typeof financialYear !== 'number') {
+	if (!financialYear || typeof financialYear !== "number") {
 		res.status(400);
 		throw new Error("Financial year is required and must be a number");
 	}
@@ -26,19 +26,30 @@ const saveESGResponse = asyncHandler(async (req, res) => {
 	const currentYear = new Date().getFullYear();
 	if (financialYear < 2000 || financialYear > currentYear + 1) {
 		res.status(400);
-		throw new Error(`Financial year must be between 2000 and ${currentYear + 1}`);
+		throw new Error(
+			`Financial year must be between 2000 and ${currentYear + 1}`
+		);
 	}
 
 	// Filter out undefined/null values and convert strings to numbers where appropriate
 	const cleanedData = {};
-	Object.keys(esgData).forEach(key => {
-		if (esgData[key] !== null && esgData[key] !== undefined && esgData[key] !== '') {
+	Object.keys(esgData).forEach((key) => {
+		if (
+			esgData[key] !== null &&
+			esgData[key] !== undefined &&
+			esgData[key] !== ""
+		) {
 			// Convert string numbers to actual numbers for numeric fields
-			if (typeof esgData[key] === 'string' && !isNaN(esgData[key]) && key !== 'hasDataPrivacyPolicy') {
+			if (
+				typeof esgData[key] === "string" &&
+				!isNaN(esgData[key]) &&
+				key !== "hasDataPrivacyPolicy"
+			) {
 				cleanedData[key] = parseFloat(esgData[key]);
-			} else if (key === 'hasDataPrivacyPolicy') {
+			} else if (key === "hasDataPrivacyPolicy") {
 				// Convert Yes/No to boolean
-				cleanedData[key] = esgData[key] === 'Yes' || esgData[key] === true;
+				cleanedData[key] =
+					esgData[key] === "Yes" || esgData[key] === true;
 			} else {
 				cleanedData[key] = esgData[key];
 			}
@@ -46,7 +57,11 @@ const saveESGResponse = asyncHandler(async (req, res) => {
 	});
 
 	try {
-		const response = await ESGService.createOrUpdate(userId, financialYear, cleanedData);
+		const response = await ESGService.createOrUpdate(
+			userId,
+			financialYear,
+			cleanedData
+		);
 
 		res.status(200).json({
 			message: "ESG response saved successfully",
@@ -91,7 +106,10 @@ const getESGResponseByYear = asyncHandler(async (req, res) => {
 	}
 
 	try {
-		const response = await ESGService.getByUserAndYear(userId, financialYear);
+		const response = await ESGService.getByUserAndYear(
+			userId,
+			financialYear
+		);
 
 		if (!response) {
 			res.status(404);
@@ -131,7 +149,8 @@ const deleteESGResponse = asyncHandler(async (req, res) => {
 			message: "ESG response deleted successfully",
 		});
 	} catch (error) {
-		if (error.code === 'P2025') { // Prisma record not found error
+		if (error.code === "P2025") {
+			// Prisma record not found error
 			res.status(404);
 			throw new Error("ESG response not found for the specified year");
 		}
@@ -167,26 +186,36 @@ const getESGSummary = asyncHandler(async (req, res) => {
 		// Calculate summary statistics
 		const summary = {
 			totalResponses: responses.length,
-			financialYears: responses.map(r => r.financialYear).sort((a, b) => b - a),
+			financialYears: responses
+				.map((r) => r.financialYear)
+				.sort((a, b) => b - a),
 			latestResponse: responses.length > 0 ? responses[0] : null,
 			trends: {
-				carbonEmissions: responses.map(r => ({
-					year: r.financialYear,
-					value: r.carbonEmissions
-				})).filter(item => item.value !== null),
-				totalRevenue: responses.map(r => ({
-					year: r.financialYear,
-					value: r.totalRevenue
-				})).filter(item => item.value !== null),
-				totalEmployees: responses.map(r => ({
-					year: r.financialYear,
-					value: r.totalEmployees
-				})).filter(item => item.value !== null),
-				diversityRatio: responses.map(r => ({
-					year: r.financialYear,
-					value: r.diversityRatio
-				})).filter(item => item.value !== null),
-			}
+				carbonEmissions: responses
+					.map((r) => ({
+						year: r.financialYear,
+						value: r.carbonEmissions,
+					}))
+					.filter((item) => item.value !== null),
+				totalRevenue: responses
+					.map((r) => ({
+						year: r.financialYear,
+						value: r.totalRevenue,
+					}))
+					.filter((item) => item.value !== null),
+				totalEmployees: responses
+					.map((r) => ({
+						year: r.financialYear,
+						value: r.totalEmployees,
+					}))
+					.filter((item) => item.value !== null),
+				diversityRatio: responses
+					.map((r) => ({
+						year: r.financialYear,
+						value: r.diversityRatio,
+					}))
+					.filter((item) => item.value !== null),
+			},
 		};
 
 		res.status(200).json({
@@ -199,12 +228,81 @@ const getESGSummary = asyncHandler(async (req, res) => {
 	}
 });
 
-export { 
+const processAIResponse = [
+	AIResponseMiddleware, // runs Gemini extraction first
+	asyncHandler(async (req, res) => {
+		const userId = req.user.id;
+		const { structuredData } = req.body;
+
+		if (!structuredData) {
+			res.status(400);
+			throw new Error("AI did not return structured ESG data");
+		}
+
+		const { financialYear, ...esgData } = structuredData;
+
+		// Validate financial year
+		if (!financialYear || typeof financialYear !== "number") {
+			res.status(400);
+			throw new Error("Financial year is required and must be a number");
+		}
+
+		const currentYear = new Date().getFullYear();
+		if (financialYear < 2000 || financialYear > currentYear + 1) {
+			res.status(400);
+			throw new Error(
+				`Financial year must be between 2000 and ${currentYear + 1}`
+			);
+		}
+
+		// Clean up data (similar to saveESGResponse)
+		const cleanedData = {};
+		Object.keys(esgData).forEach((key) => {
+			if (
+				esgData[key] !== null &&
+				esgData[key] !== undefined &&
+				esgData[key] !== ""
+			) {
+				if (
+					typeof esgData[key] === "string" &&
+					!isNaN(esgData[key]) &&
+					key !== "hasDataPrivacyPolicy"
+				) {
+					cleanedData[key] = parseFloat(esgData[key]);
+				} else if (key === "hasDataPrivacyPolicy") {
+					cleanedData[key] =
+						esgData[key] === "Yes" || esgData[key] === true;
+				} else {
+					cleanedData[key] = esgData[key];
+				}
+			}
+		});
+
+		try {
+			const response = await ESGService.createOrUpdate(
+				userId,
+				financialYear,
+				cleanedData
+			);
+
+			res.status(200).json({
+				message: "ESG response processed & saved successfully",
+				data: response,
+			});
+		} catch (error) {
+			res.status(500);
+			throw new Error("Failed to save ESG response: " + error.message);
+		}
+	}),
+];
+
+export {
 	getMetricsMetadata,
-	saveESGResponse, 
-	getESGResponses, 
-	getESGResponseByYear, 
-	deleteESGResponse, 
+	saveESGResponse,
+	getESGResponses,
+	getESGResponseByYear,
+	deleteESGResponse,
 	getFinancialYears,
-	getESGSummary 
+	getESGSummary,
+	processAIResponse,
 };
