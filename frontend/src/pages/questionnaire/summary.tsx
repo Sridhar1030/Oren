@@ -539,13 +539,7 @@ const SummaryPage: React.FC = () => {
 									<FileText className="w-4 h-4 mr-2" />
 									Download PDF
 								</button>
-								<button
-									onClick={handleDownloadExcel}
-									className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center"
-								>
-									<FileSpreadsheet className="w-4 h-4 mr-2" />
-									Download Excel
-								</button>
+								
 							</div>
 						</div>
 					</div>
@@ -985,3 +979,4 @@ const SummaryPage: React.FC = () => {
 };
 
 export default withAuth(SummaryPage, { title: "ESG Summary - Oren" });
+

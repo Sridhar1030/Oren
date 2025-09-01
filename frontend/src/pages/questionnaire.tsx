@@ -663,7 +663,7 @@ const QuestionnairePage: React.FC = () => {
 								<button
 									type="submit"
 									disabled={isSubmitting}
-									className="w-full bg-[#BBE8E1] hover:bg-[#A8D8D1] text-white font-semibold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+									className="w-full bg-blue-400 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#BBE8E1] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
 								>
 									{isSubmitting ? (
 										<>
@@ -682,7 +682,7 @@ const QuestionnairePage: React.FC = () => {
 								<div className="mt-4 text-center">
 									<Link
 										href="/questionnaire/summary"
-										className="inline-flex items-center text-[#BBE8E1] hover:text-[#A8D8D1] font-medium transition-colors"
+										className="inline-flex items-center text-red-500 hover:text-red-600 font-medium transition-colors"
 									>
 										<BarChart3 className="w-4 h-4 mr-2" />
 										View ESG Summary
