@@ -1,7 +1,7 @@
 # 🌱 Oren ESG - Sustainability Data Management Platform
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/864699dd-d50e-409a-bf04-9cceb51db8d3" alt="Oren ESG Homepage" width="800">
+  
   
   <p><em>All Your Sustainability Data and Stakeholders Connected in One Place</em></p>
 
