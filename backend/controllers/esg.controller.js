@@ -1,4 +1,4 @@
-import { ESGService } from "../models/esg.models.js";
+import { ESGService } from "../utils/esg.utils.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { AIResponseMiddleware } from "../middlewares/ai.middlewares.js";
 // Get ESG metrics metadata
