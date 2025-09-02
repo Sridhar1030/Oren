@@ -171,9 +171,13 @@ Visit `http://localhost:3000` to see the application!
 <img src="https://github.com/user-attachments/assets/864699dd-d50e-409a-bf04-9cceb51db8d3" alt="Oren ESG Homepage" width="800">
 
 *Beautiful, modern homepage showcasing key features and auto-calculated ESG metrics*
+### OCR page
+<img width="1294" height="900" alt="image" src="https://github.com/user-attachments/assets/00f79046-5286-40b3-bce6-c2aaa2b55236" />
 
-### 🔐 Authentication
-<img src="https://github.com/user-attachments/assets/1b38d305-c206-4e2c-ba8d-3824df341d53" alt="Login Page" width="600">
+
+### Summary Page 
+<img width="1320" height="921" alt="image" src="https://github.com/user-attachments/assets/c7df1ad5-9313-444d-a00a-3c71441565ea" />
+
 
 *Clean, user-friendly login interface with demo credentials for easy testing*
 
