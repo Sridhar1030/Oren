@@ -1,0 +1,65 @@
+{
+  "name": "oren-esg-platform",
+  "version": "1.0.0",
+  "description": "Comprehensive ESG questionnaire and sustainability data management platform",
+  "keywords": [
+    "esg",
+    "sustainability",
+    "environmental",
+    "social",
+    "governance",
+    "questionnaire",
+    "data-management",
+    "reporting",
+    "carbon-tracking",
+    "nextjs",
+    "nodejs",
+    "postgresql"
+  ],
+  "author": {
+    "name": "Sridhar Pillai",
+    "email": "sridharpillai75@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sridhar1030/Oren.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sridhar1030/Oren/issues"
+  },
+  "homepage": "https://github.com/Sridhar1030/Oren#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && npm install && cp env.example .env",
+    "setup:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "db:setup": "cd backend && npm run db:generate && npm run db:push && npm run db:seed",
+    "db:studio": "cd backend && npm run db:studio",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
