@@ -45,15 +45,7 @@ const RegisterPage: React.FC = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-[#BBE8E1] rounded-xl flex items-center justify-center mx-auto mb-6">
-              {/* Oren logo with dots */}
-              <div className="flex flex-col items-center">
-                <div className="text-2xl font-bold text-white mb-1">Oren</div>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                </div>
-              </div>
+
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create account</h1>
             <p className="text-gray-600">Join Oren today</p>
