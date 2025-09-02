@@ -179,24 +179,42 @@ const SummaryPage: React.FC = () => {
 			? [
 					{
 						year: selectedYear,
-						carbonEmissions: selectedData.carbonEmissions,
+						// keep original for tooltip display
+						originalCarbonEmissions: Number(selectedData.carbonEmissions.toFixed(2)),
+						// normalized bar value: if >1000, clamp display to 100
+						carbonEmissionsBar:
+							selectedData.carbonEmissions > 1000
+								? 100
+								: Number(selectedData.carbonEmissions.toFixed(2)),
 						renewableRatio:
 							selectedData.totalElectricityConsumption > 0
-								? (selectedData.renewableElectricityConsumption /
-										selectedData.totalElectricityConsumption) *
-								  100
+								? Number(
+									(
+										(selectedData.renewableElectricityConsumption /
+											selectedData.totalElectricityConsumption) *
+										100
+									).toFixed(2)
+								)
 								: 0,
 						diversityRatio:
 							selectedData.totalEmployees > 0
-								? (selectedData.femaleEmployees /
-										selectedData.totalEmployees) *
-								  100
+								? Number(
+									(
+										(selectedData.femaleEmployees /
+											selectedData.totalEmployees) *
+										100
+									).toFixed(2)
+								)
 								: 0,
 						communitySpendRatio:
 							selectedData.totalRevenue > 0
-								? (selectedData.communityInvestmentSpend /
-										selectedData.totalRevenue) *
-								  100
+								? Number(
+									(
+										(selectedData.communityInvestmentSpend /
+											selectedData.totalRevenue) *
+										100
+									).toFixed(2)
+								)
 								: 0,
 					},
 			  ]
@@ -207,13 +225,43 @@ const SummaryPage: React.FC = () => {
 	console.log("Selected Data:", selectedData);
 	console.log("Yearly Comparison Data:", yearlyComparisonData);
 
-	const pieData = selectedData
-		? [
-				{ name: "Environmental", value: 35, color: "#10b981" },
-				{ name: "Social", value: 40, color: "#3b82f6" },
-				{ name: "Governance", value: 25, color: "#8b5cf6" },
-		  ]
-		: [];
+	const pieData = (() => {
+		if (!selectedData) return [] as { name: string; value: number; color: string }[];
+
+		const renewableRatio =
+			selectedData.totalElectricityConsumption > 0
+				? (selectedData.renewableElectricityConsumption / selectedData.totalElectricityConsumption) * 100
+				: 0;
+		const diversityRatio =
+			selectedData.totalEmployees > 0
+				? (selectedData.femaleEmployees / selectedData.totalEmployees) * 100
+				: 0;
+		const governancePercent = selectedData.independentBoardMembersPercent ?? 0;
+
+		const envRaw = Math.max(0, renewableRatio);
+		const socRaw = Math.max(0, diversityRatio);
+		const govRaw = Math.max(0, governancePercent);
+		const total = envRaw + socRaw + govRaw;
+
+		if (total <= 0) {
+			return [
+				{ name: "Environmental", value: 0, color: "#10b981" },
+				{ name: "Social", value: 0, color: "#3b82f6" },
+				{ name: "Governance", value: 0, color: "#8b5cf6" },
+			];
+		}
+
+		const normalize = (val: number) => (val / total) * 100;
+		const env = normalize(envRaw);
+		const soc = normalize(socRaw);
+		const gov = normalize(govRaw);
+
+		return [
+			{ name: "Environmental", value: Number(env.toFixed(2)), color: "#10b981" },
+			{ name: "Social", value: Number(soc.toFixed(2)), color: "#3b82f6" },
+			{ name: "Governance", value: Number(gov.toFixed(2)), color: "#8b5cf6" },
+		];
+	})();
 
 	const handleDownloadPDF = async () => {
 		if (!selectedData || !selectedYear) {
@@ -726,10 +774,20 @@ const SummaryPage: React.FC = () => {
 											>
 												<CartesianGrid strokeDasharray="3 3" />
 												<XAxis dataKey="year" />
-												<YAxis />
-												<Tooltip />
+												<YAxis domain={[0, 200]} tickFormatter={(v) => Number(v).toFixed(2)} />
+												<Tooltip
+													formatter={(value, name, props) => {
+														if (name === "Carbon Emissions") {
+															const orig = props && (props as any).payload?.originalCarbonEmissions;
+															if (typeof orig === 'number') {
+																return [orig >= 1000 ? `${(orig / 1000).toFixed(1)}k` : orig.toFixed(2), name];
+															}
+														}
+														return [Number(value as number).toFixed(2), name];
+													}}
+												/>
 												<Bar
-													dataKey="carbonEmissions"
+													dataKey="carbonEmissionsBar"
 													fill="#10b981"
 													name="Carbon Emissions"
 												/>
@@ -979,4 +1037,6 @@ const SummaryPage: React.FC = () => {
 };
 
 export default withAuth(SummaryPage, { title: "ESG Summary - Oren" });
+
+
 
