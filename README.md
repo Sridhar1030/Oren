@@ -14,6 +14,20 @@
 
 </div>
 
+## 📸 Screenshots
+
+### 🏠 Homepage
+<img src="https://github.com/user-attachments/assets/864699dd-d50e-409a-bf04-9cceb51db8d3" alt="Oren ESG Homepage" width="800">
+
+*Beautiful, modern homepage showcasing key features and auto-calculated ESG metrics*
+### OCR page
+<img width="1294" height="900" alt="image" src="https://github.com/user-attachments/assets/00f79046-5286-40b3-bce6-c2aaa2b55236" />
+
+
+### Summary Page 
+<img width="1320" height="921" alt="image" src="https://github.com/user-attachments/assets/c7df1ad5-9313-444d-a00a-3c71441565ea" />
+
+
 ## 📋 Table of Contents
 
 - [🌟 Overview](#-overview)
@@ -21,7 +35,6 @@
 - [🎯 ESG Metrics Supported](#-esg-metrics-supported)
 - [🏗️ Architecture](#️-architecture)
 - [🚀 Quick Start](#-quick-start)
-- [📸 Screenshots](#-screenshots)
 - [🛠️ Installation](#️-installation)
 - [📚 API Documentation](#-api-documentation)
 - [🔧 Development](#-development)
@@ -165,18 +178,6 @@ npm run dev
 
 Visit `http://localhost:3000` to see the application!
 
-## 📸 Screenshots
-
-### 🏠 Homepage
-<img src="https://github.com/user-attachments/assets/864699dd-d50e-409a-bf04-9cceb51db8d3" alt="Oren ESG Homepage" width="800">
-
-*Beautiful, modern homepage showcasing key features and auto-calculated ESG metrics*
-### OCR page
-<img width="1294" height="900" alt="image" src="https://github.com/user-attachments/assets/00f79046-5286-40b3-bce6-c2aaa2b55236" />
-
-
-### Summary Page 
-<img width="1320" height="921" alt="image" src="https://github.com/user-attachments/assets/c7df1ad5-9313-444d-a00a-3c71441565ea" />
 
 
 *Clean, user-friendly login interface with demo credentials for easy testing*
