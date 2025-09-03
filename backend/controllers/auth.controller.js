@@ -1,4 +1,4 @@
-import { UserService } from "../models/user.models.js";
+import { UserService } from "../utils/user.utils.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const generateAccessTokenAndRefreshToken = async (user) => {

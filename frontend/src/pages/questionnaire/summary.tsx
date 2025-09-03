@@ -449,10 +449,7 @@ const SummaryPage: React.FC = () => {
 		}
 	};
 
-	const handleDownloadExcel = () => {
-		// TODO: Implement Excel download
-		alert("Excel download functionality will be implemented here");
-	};
+	
 
 	if (loading) {
 		return (
